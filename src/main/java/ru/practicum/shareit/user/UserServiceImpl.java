@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 @Service
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     private final Map<Long, User> userDatabase = new HashMap<>();
     private long idCounter = 1;
 
