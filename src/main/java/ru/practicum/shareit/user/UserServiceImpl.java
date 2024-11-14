@@ -3,17 +3,16 @@ package ru.practicum.shareit.user;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.BadRequestException;
 import ru.practicum.shareit.exceptions.ConflictException;
+import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @Service
 public class UserServiceImpl implements UserService {
     private final Map<Long, User> userDatabase = new HashMap<>();
+    private final Set<String> emailSet = new HashSet<>();
     private long idCounter = 1;
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
@@ -30,17 +29,17 @@ public class UserServiceImpl implements UserService {
             throw new BadRequestException("Invalid email format.");
         }
 
-        for (User user : userDatabase.values()) {
-            if (user.getEmail().equals(userDto.getEmail())) {
-                throw new ConflictException("Email already in use.");
-            }
+        if (emailSet.contains(userDto.getEmail())) {
+            throw new ConflictException("Email already in use.");
         }
 
         User user = UserMapper.toUser(userDto);
         user.setId(idCounter++);
         userDatabase.put(user.getId(), user);
+        emailSet.add(user.getEmail());
         return UserMapper.toUserDto(user);
     }
+
 
     @Override
     public List<UserDto> getAllUsers() {
@@ -58,22 +57,36 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUser(Long userId, UserDto userDto) {
         User user = userDatabase.get(userId);
-        if (user != null) {
-            for (User existingUser : userDatabase.values()) {
-                if (!existingUser.getId().equals(userId) && existingUser.getEmail().equals(userDto.getEmail())) {
-                    throw new ConflictException("Email already in use by another user.");
-                }
+        if (user == null) {
+            throw new NotFoundException("User not found.");
+        }
+
+        if (userDto.getEmail() != null && !userDto.getEmail().isEmpty()) {
+            if (!EMAIL_PATTERN.matcher(userDto.getEmail()).matches()) {
+                throw new BadRequestException("Invalid email format.");
             }
 
-            user.setName(userDto.getName());
+            if (!user.getEmail().equals(userDto.getEmail()) && emailSet.contains(userDto.getEmail())) {
+                throw new ConflictException("Email already in use by another user.");
+            }
+
+            emailSet.remove(user.getEmail());
+            emailSet.add(userDto.getEmail());
             user.setEmail(userDto.getEmail());
-            return UserMapper.toUserDto(user);
         }
-        return null;
+
+        if (userDto.getName() != null && !userDto.getName().isEmpty()) {
+            user.setName(userDto.getName());
+        }
+
+        return UserMapper.toUserDto(user);
     }
 
     @Override
     public void deleteUser(Long userId) {
-        userDatabase.remove(userId);
+        User user = userDatabase.remove(userId);
+        if (user != null) {
+            emailSet.remove(user.getEmail());
+        }
     }
 }
