@@ -95,20 +95,17 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> searchItems(String text) {
-        List<ItemDto> foundItems = new ArrayList<>();
-
         if (text == null || text.trim().isEmpty()) {
-            return foundItems;
+            return new ArrayList<>();
         }
 
-        for (Item item : itemDatabase.values()) {
-            if (item.getAvailable() &&
-                    (item.getName().toLowerCase().contains(text.toLowerCase()) ||
-                            item.getDescription().toLowerCase().contains(text.toLowerCase()))) {
-                foundItems.add(ItemMapper.toItemDto(item));
-            }
-        }
+        String searchText = text.toLowerCase();
 
-        return foundItems;
+        return itemDatabase.values().stream()
+                .filter(item -> item.getAvailable() &&
+                        (item.getName().toLowerCase().contains(searchText) ||
+                                item.getDescription().toLowerCase().contains(searchText)))
+                .map(ItemMapper::toItemDto)
+                .toList();
     }
 }

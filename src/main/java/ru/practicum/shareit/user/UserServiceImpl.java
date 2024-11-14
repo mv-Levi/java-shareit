@@ -44,11 +44,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getAllUsers() {
-        List<UserDto> users = new ArrayList<>();
-        for (User user : userDatabase.values()) {
-            users.add(UserMapper.toUserDto(user));
-        }
-        return users;
+        return userDatabase.values().stream()
+                .map(UserMapper::toUserDto)
+                .toList();
     }
 
     @Override
