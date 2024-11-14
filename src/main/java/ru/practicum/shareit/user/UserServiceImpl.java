@@ -66,13 +66,15 @@ public class UserServiceImpl implements UserService {
                 throw new BadRequestException("Invalid email format.");
             }
 
-            if (!user.getEmail().equals(userDto.getEmail()) && emailSet.contains(userDto.getEmail())) {
-                throw new ConflictException("Email already in use by another user.");
-            }
+            if (!user.getEmail().equals(userDto.getEmail())) {
+                if (emailSet.contains(userDto.getEmail())) {
+                    throw new ConflictException("Email already in use by another user.");
+                }
 
-            emailSet.remove(user.getEmail());
-            emailSet.add(userDto.getEmail());
-            user.setEmail(userDto.getEmail());
+                emailSet.remove(user.getEmail());
+                emailSet.add(userDto.getEmail());
+                user.setEmail(userDto.getEmail());
+            }
         }
 
         if (userDto.getName() != null && !userDto.getName().isEmpty()) {
