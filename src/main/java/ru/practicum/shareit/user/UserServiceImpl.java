@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.BadRequestException;
 import ru.practicum.shareit.exceptions.ConflictException;
@@ -18,6 +19,11 @@ public class UserServiceImpl implements UserService {
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$"
     );
+
+    @PostConstruct
+    public void initEmailSet() {
+        userDatabase.values().forEach(user -> emailSet.add(user.getEmail()));
+    }
 
     @Override
     public UserDto createUser(UserDto userDto) {
