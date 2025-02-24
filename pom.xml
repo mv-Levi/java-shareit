@@ -148,14 +148,11 @@
 						<includeTestSourceDirectory>true</includeTestSourceDirectory>
 					</configuration>
 					<dependencies>
-          add-bookings
 						<dependency>
 							<groupId>com.puppycrawl.tools</groupId>
 							<artifactId>checбkstyle</artifactId>
 							<version>10.3</version>
 						</dependency>
-
-          main
 					</dependencies>
 				</plugin>
 				<plugin>
