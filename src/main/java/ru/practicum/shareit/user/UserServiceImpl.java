@@ -6,9 +6,7 @@ import ru.practicum.shareit.exceptions.BadRequestException;
 import ru.practicum.shareit.exceptions.ConflictException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
-
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
