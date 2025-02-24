@@ -32,7 +32,7 @@ class ShareItTests {
 		booking.setStatus(Status.WAITING);
 		bookingRepository.save(booking);
 	}
-	
+
 	@Test
 	void contextLoads() {
 	}
