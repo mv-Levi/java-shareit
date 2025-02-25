@@ -35,31 +35,25 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingDto createBooking(Long userId, BookingDto bookingDto) {
-        // Проверка существования пользователя
         User booker = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found with ID: " + userId));
 
-        // Получение itemId из bookingDto
         Long itemId = bookingDto.getItemId();
         if (itemId == null) {
             throw new NotFoundException("Item not found with ID: null");
         }
 
-        // Проверка существования предмета
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item not found with ID: " + itemId));
 
-        // Проверка доступности предмета
         if (!item.getAvailable()) {
             throw new BadRequestException("Item with ID: " + itemId + " is not available for booking.");
         }
 
-        // Запрет бронирования собственником
         if (item.getOwner().getId().equals(userId)) {
             throw new BadRequestException("Owner cannot book their own item.");
         }
 
-        // Проверка корректности дат
         if (bookingDto.getStart() == null || bookingDto.getEnd() == null) {
             throw new BadRequestException("Start and end dates must be provided.");
         }
@@ -68,7 +62,6 @@ public class BookingServiceImpl implements BookingService {
             throw new BadRequestException("Start date must be before end date.");
         }
 
-        // Создание бронирования
         Booking booking = BookingMapper.toEntity(bookingDto, item, booker);
         booking.setStatus(Status.WAITING);
         log.info("Received bookingDto: {}", bookingDto);
