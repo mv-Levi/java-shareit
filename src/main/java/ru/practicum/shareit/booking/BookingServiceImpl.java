@@ -109,26 +109,17 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException("User not found.");
         }
 
+        BookingState bookingState = BookingState.fromString(state);
         List<Booking> bookings;
-        switch (state.toUpperCase()) {
-            case "CURRENT":
-                bookings = bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(
-                        userId, LocalDateTime.now(), LocalDateTime.now());
-                break;
-            case "PAST":
-                bookings = bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
-                break;
-            case "FUTURE":
-                bookings = bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now());
-                break;
-            case "WAITING":
-                bookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING);
-                break;
-            case "REJECTED":
-                bookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED);
-                break;
-            default:
-                bookings = bookingRepository.findByBookerIdOrderByStartDesc(userId);
+
+        switch (bookingState) {
+            case CURRENT -> bookings = bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(
+                    userId, LocalDateTime.now(), LocalDateTime.now());
+            case PAST -> bookings = bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
+            case FUTURE -> bookings = bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now());
+            case WAITING -> bookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING);
+            case REJECTED -> bookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED);
+            default -> bookings = bookingRepository.findByBookerIdOrderByStartDesc(userId);
         }
 
         return bookings.stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
@@ -140,16 +131,18 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException("User not found.");
         }
 
-        List<Booking> bookings = switch (state.toUpperCase()) {
-            case "CURRENT" -> bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(
+        BookingState bookingState = BookingState.fromString(state);
+        List<Booking> bookings;
+
+        switch (bookingState) {
+            case CURRENT -> bookings = bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(
                     userId, LocalDateTime.now(), LocalDateTime.now());
-            case "PAST" -> bookingRepository.findByItemOwnerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
-            case "FUTURE" ->
-                    bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now());
-            case "WAITING" -> bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(userId, Status.WAITING);
-            case "REJECTED" -> bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(userId, Status.REJECTED);
-            default -> bookingRepository.findByItemOwnerIdOrderByStartDesc(userId);
-        };
+            case PAST -> bookings = bookingRepository.findByItemOwnerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
+            case FUTURE -> bookings = bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now());
+            case WAITING -> bookings = bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(userId, Status.WAITING);
+            case REJECTED -> bookings = bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(userId, Status.REJECTED);
+            default -> bookings = bookingRepository.findByItemOwnerIdOrderByStartDesc(userId);
+        }
 
         return bookings.stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
     }
