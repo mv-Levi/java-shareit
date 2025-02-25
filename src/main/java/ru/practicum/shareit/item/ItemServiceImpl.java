@@ -108,7 +108,6 @@ public class ItemServiceImpl implements ItemService {
         return items.stream().map(item -> {
             ItemDto itemDto = ItemMapper.toItemDto(item);
 
-            // Получение последнего и следующего бронирования
             Optional<Booking> lastBooking = bookingRepository.findFirstByItemIdAndEndBeforeOrderByEndDesc(item.getId(), now);
             Optional<Booking> nextBooking = bookingRepository.findFirstByItemIdAndStartAfterOrderByStartAsc(item.getId(), now);
 
@@ -134,16 +133,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto addComment(Long userId, Long itemId, CommentDto commentDto) {
-        // Проверка, что пользователь существует
         User author = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found."));
 
-        // Проверка, что вещь существует
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item not found."));
 
-        // Проверяем, есть ли у пользователя хотя бы одно бронирование этой вещи,
-        // которое закончилось в прошлом и имело статус APPROVED
         boolean hasPastBooking = bookingRepository
                 .findByBookerIdAndItemIdAndEndBefore(userId, itemId, LocalDateTime.now())
                 .stream()
@@ -153,7 +148,6 @@ public class ItemServiceImpl implements ItemService {
             throw new BadRequestException("User did not rent this item in the past.");
         }
 
-        // Создаём комментарий
         Comment comment = new Comment();
         comment.setText(commentDto.getText());
         comment.setAuthor(author);
