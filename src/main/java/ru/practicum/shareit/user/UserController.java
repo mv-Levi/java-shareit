@@ -19,35 +19,30 @@ public class UserController {
         this.userService = userService;
     }
 
-    // Создание пользователя
     @PostMapping
     public UserDto createUser(@RequestBody UserDto userDto) {
         log.info("Creating user with data: " + userDto);
         return userService.createUser(userDto);
     }
 
-    // Получение списка всех пользователей
     @GetMapping
     public List<UserDto> getAllUsers() {
         log.info("Fetching all users");
         return userService.getAllUsers();
     }
 
-    // Получение информации о пользователе
     @GetMapping("/{userId}")
     public UserDto getUser(@PathVariable Long userId) {
         log.info("Fetching user with ID: " + userId);
         return userService.getUser(userId);
     }
 
-    // Обновление информации о пользователе
     @PatchMapping("/{userId}")
     public UserDto updateUser(@PathVariable Long userId, @RequestBody UserDto userDto) {
         log.info("Updating user with ID: " + userId + " with data: " + userDto);
         return userService.updateUser(userId, userDto);
     }
 
-    // Удаление пользователя
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable Long userId) {
         log.info("Deleting user with ID: " + userId);
