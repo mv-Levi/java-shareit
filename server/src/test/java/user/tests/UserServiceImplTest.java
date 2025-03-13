@@ -40,7 +40,6 @@ public class UserServiceImplTest {
 
     @Test
     void testCreateUserSuccess() {
-        // Arrange
         when(userRepository.findByEmail(validUserDto.getEmail())).thenReturn(Optional.empty());
         User savedUser = new User();
         savedUser.setId(1L);
@@ -48,10 +47,8 @@ public class UserServiceImplTest {
         savedUser.setEmail(validUserDto.getEmail());
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
-        // Act
         UserDto created = userService.createUser(validUserDto);
 
-        // Assert
         assertNotNull(created);
         assertNotNull(created.getId());
         assertEquals("Alice", created.getName());
@@ -91,11 +88,9 @@ public class UserServiceImplTest {
 
     @Test
     void testCreateUser_whenEmailAlreadyExists_thenThrowConflictException() {
-        // Arrange: настроим, что email уже существует
         when(userRepository.findByEmail(validUserDto.getEmail()))
                 .thenReturn(Optional.of(new User()));
 
-        // Act & Assert
         ConflictException ex = assertThrows(
                 ConflictException.class,
                 () -> userService.createUser(validUserDto)
@@ -105,7 +100,6 @@ public class UserServiceImplTest {
 
     @Test
     void testGetAllUsers() {
-        // Arrange: создаём двух пользователей
         UserDto user1 = new UserDto();
         user1.setName("User One");
         user1.setEmail("user1@example.com");
@@ -114,7 +108,6 @@ public class UserServiceImplTest {
         user2.setName("User Two");
         user2.setEmail("user2@example.com");
 
-        // Настраиваем mock-возвращение при сохранении
         User savedUser1 = new User();
         savedUser1.setId(1L);
         savedUser1.setName(user1.getName());
@@ -132,19 +125,15 @@ public class UserServiceImplTest {
         userService.createUser(user1);
         userService.createUser(user2);
 
-        // Настраиваем возврат всех пользователей
         when(userRepository.findAll()).thenReturn(List.of(savedUser1, savedUser2));
 
-        // Act
         List<UserDto> allUsers = userService.getAllUsers();
 
-        // Assert
         assertThat(allUsers).hasSize(2);
     }
 
     @Test
     void testGetUserSuccess() {
-        // Arrange: создаём пользователя и возвращаем его по ID
         UserDto userDto = new UserDto();
         userDto.setName("Bob");
         userDto.setEmail("bob@example.com");
@@ -159,10 +148,8 @@ public class UserServiceImplTest {
 
         userService.createUser(userDto);
 
-        // Act
         UserDto found = userService.getUser(3L);
 
-        // Assert
         assertNotNull(found);
         assertEquals(3L, found.getId());
         assertEquals("Bob", found.getName());
@@ -171,7 +158,6 @@ public class UserServiceImplTest {
 
     @Test
     void testUpdateUserSuccess() {
-        // Arrange: создаём пользователя
         UserDto userDto = new UserDto();
         userDto.setName("Charlie");
         userDto.setEmail("charlie@example.com");
@@ -186,14 +172,12 @@ public class UserServiceImplTest {
 
         userService.createUser(userDto);
 
-        // Act: обновляем данные пользователя
         UserDto updateDto = new UserDto();
         updateDto.setName("Charles");
         updateDto.setEmail("charles@example.com");
 
         UserDto updated = userService.updateUser(4L, updateDto);
 
-        // Assert
         assertNotNull(updated);
         assertEquals(4L, updated.getId());
         assertEquals("Charles", updated.getName());
@@ -202,7 +186,6 @@ public class UserServiceImplTest {
 
     @Test
     void testDeleteUserSuccess() {
-        // Arrange: создаём пользователя
         UserDto userDto = new UserDto();
         userDto.setName("Diana");
         userDto.setEmail("diana@example.com");
@@ -212,18 +195,14 @@ public class UserServiceImplTest {
         savedUser.setName("Diana");
         savedUser.setEmail("diana@example.com");
 
-        // Настраиваем моки
         when(userRepository.findByEmail(userDto.getEmail())).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
-        // При первом вызове existsById возвращаем true, а при втором — false
         when(userRepository.existsById(5L)).thenReturn(true, false);
         when(userRepository.findById(5L)).thenReturn(Optional.empty());
 
-        // Act: создаём пользователя и затем удаляем его
         userService.createUser(userDto);
         userService.deleteUser(5L);
 
-        // Assert: запрос пользователя после удаления должен выбросить NotFoundException
         assertThrows(NotFoundException.class, () -> userService.getUser(5L));
     }
 }

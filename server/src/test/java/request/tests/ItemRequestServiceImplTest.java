@@ -37,6 +37,8 @@ public class ItemRequestServiceImplTest {
     @Autowired
     private ItemRepository itemRepository;
 
+    private User requestor;
+
     @Test
     void testCreateRequestSuccess() {
         User requestor = new User();
@@ -240,6 +242,15 @@ public class ItemRequestServiceImplTest {
         assertThrows(NotFoundException.class, () ->
                 itemRequestService.getRequestById(finalUser.getId(), nonExistentRequestId)
         );
+    }
+
+    @Test
+    void testCreateRequestWithNullDescription() {
+        ItemRequestDto requestDto = new ItemRequestDto();
+        requestDto.setDescription(null);
+
+        assertThrows(RuntimeException.class, () ->
+                itemRequestService.createRequest(requestor.getId(), requestDto));
     }
 
 }
