@@ -16,6 +16,6 @@ public class ItemDto {
     private BookingDto lastBooking;
     private BookingDto nextBooking;
     private List<CommentDto> comments;
-    private Long requestId; // новое поле для ответа на запрос
+    private Long requestId;
 
 }

@@ -71,10 +71,10 @@ class BookingMapperTest {
     @Test
     void toEntityTest() {
         BookingDto dto = new BookingDto();
-        dto.setId(100L); // toEntity не устанавливает id, так что ожидаем null в результате
+        dto.setId(100L);
         dto.setStart(LocalDateTime.of(2025, 5, 1, 15, 0));
         dto.setEnd(LocalDateTime.of(2025, 5, 2, 15, 0));
-        dto.setStatus(Status.REJECTED); // при toEntity игнорируется и ставится WAITING
+        dto.setStatus(Status.REJECTED);
 
         Item item = new Item();
         item.setId(200L);

@@ -69,7 +69,6 @@ public class ItemRequestServiceImplTest {
         dto1.setDescription("First request");
         ItemRequestDto created1 = itemRequestService.createRequest(requestor.getId(), dto1);
 
-        // Немного задержимся, чтобы у запросов различное время создания
         Thread.sleep(10);
 
         ItemRequestDto dto2 = new ItemRequestDto();

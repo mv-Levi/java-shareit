@@ -23,7 +23,6 @@ class ItemRequestTest {
         ItemRequest request = new ItemRequest();
         request.setId(2L);
 
-        // Сравнение с null должно вернуть false
         assertThat(request.equals(null)).isFalse();
     }
 

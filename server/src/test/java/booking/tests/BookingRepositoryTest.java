@@ -68,9 +68,7 @@ public class BookingRepositoryTest {
 
         List<Booking> bookings = bookingRepository.findByBookerIdOrderByStartDesc(booker.getId());
 
-        // Assert: проверяем, что бронирования возвращаются отсортированными по start (DESC)
         assertThat(bookings).hasSize(2);
-        // Первое бронирование должно иметь более позднюю start (то есть booking2)
         assertThat(bookings.get(0).getStart()).isAfterOrEqualTo(bookings.get(1).getStart());
     }
 
@@ -109,10 +107,8 @@ public class BookingRepositoryTest {
         booking2.setBooker(booker);
         bookingRepository.save(booking2);
 
-        // Act: получаем бронирования по ownerId
         List<Booking> bookings = bookingRepository.findByItemOwnerIdOrderByStartDesc(owner.getId());
 
-        // Assert: бронирования должны быть отсортированы по start DESC
         assertThat(bookings).hasSize(2);
         assertThat(bookings.get(0).getStart()).isAfterOrEqualTo(bookings.get(1).getStart());
     }
@@ -152,10 +148,8 @@ public class BookingRepositoryTest {
         bookingApproved.setBooker(booker);
         bookingRepository.save(bookingApproved);
 
-        // Act: выбираем бронирования для booker с статусом WAITING, отсортированные по start DESC
         List<Booking> waitingBookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(booker.getId(), Status.WAITING);
 
-        // Assert: ожидание, что будет найдено только одно бронирование с WAITING
         assertThat(waitingBookings).hasSize(1);
         assertThat(waitingBookings.get(0).getStatus()).isEqualTo(Status.WAITING);
     }
@@ -195,18 +189,14 @@ public class BookingRepositoryTest {
         bookingApproved.setBooker(booker);
         bookingRepository.save(bookingApproved);
 
-        // Act: выбираем бронирования владельца с статусом WAITING
         List<Booking> result = bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(owner.getId(), Status.WAITING);
 
-        // Assert: должно вернуться ровно одно бронирование с статусом WAITING
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getStatus()).isEqualTo(Status.WAITING);
     }
 
     @Test
     void testFindByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc() {
-        // Arrange
-        // Создаем пользователя (booker) и владельца
         User booker = new User();
         booker.setName("Booker Five");
         booker.setEmail("booker5@example.com");
@@ -224,7 +214,6 @@ public class BookingRepositoryTest {
         item.setOwner(owner);
         item = itemRepository.save(item);
 
-        // Создаем бронирование, которое "текущее": start < now < end
         LocalDateTime now = LocalDateTime.now();
         Booking currentBooking = new Booking();
         currentBooking.setStart(now.minusHours(2));
@@ -234,7 +223,6 @@ public class BookingRepositoryTest {
         currentBooking.setBooker(booker);
         bookingRepository.save(currentBooking);
 
-        // Создаем бронирование, которое не попадает (например, в прошлом)
         Booking pastBooking = new Booking();
         pastBooking.setStart(now.minusDays(2));
         pastBooking.setEnd(now.minusDays(2).plusHours(1));
@@ -243,12 +231,10 @@ public class BookingRepositoryTest {
         pastBooking.setBooker(booker);
         bookingRepository.save(pastBooking);
 
-        // Act: вызываем метод для получения "текущего" бронирования
         List<Booking> result = bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(
                 booker.getId(), now, now
         );
 
-        // Assert: ожидаем, что вернется только текущее бронирование
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getStart()).isEqualTo(currentBooking.getStart());
     }
@@ -272,7 +258,6 @@ public class BookingRepositoryTest {
         item.setOwner(owner);
         item = itemRepository.save(item);
 
-        // Создаем два бронирования, которые закончились до текущего времени
         LocalDateTime now = LocalDateTime.now();
         Booking booking1 = new Booking();
         booking1.setStart(now.minusDays(5));
@@ -290,10 +275,8 @@ public class BookingRepositoryTest {
         booking2.setBooker(booker);
         bookingRepository.save(booking2);
 
-        // Act: вызываем метод для получения бронирований, завершившихся до now, отсортированных по start DESC
         List<Booking> result = bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(booker.getId(), now);
 
-        // Assert: ожидаем, что вернется 2 бронирования, причем первое имеет более позднее значение start, чем второе
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getStart()).isAfterOrEqualTo(result.get(1).getStart());
     }
@@ -319,7 +302,6 @@ public class BookingRepositoryTest {
 
         LocalDateTime now = LocalDateTime.now();
 
-        // Создаем два будущих бронирования (start > now)
         Booking futureBooking1 = new Booking();
         futureBooking1.setStart(now.plusDays(1));
         futureBooking1.setEnd(now.plusDays(1).plusHours(2));
@@ -336,7 +318,6 @@ public class BookingRepositoryTest {
         futureBooking2.setBooker(booker);
         futureBooking2 = bookingRepository.save(futureBooking2);
 
-        // Создаем бронирование, которое уже началось (past) — оно не должно попадать в результат
         Booking pastBooking = new Booking();
         pastBooking.setStart(now.minusDays(1));
         pastBooking.setEnd(now.minusDays(1).plusHours(2));
@@ -345,15 +326,10 @@ public class BookingRepositoryTest {
         pastBooking.setBooker(booker);
         bookingRepository.save(pastBooking);
 
-        // Act: получаем бронирования booker'а, где start > now, отсортированные по start DESC
         List<Booking> result = bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(booker.getId(), now);
 
-        // Assert:
-        // Ожидаем, что вернутся только 2 будущих бронирования
         assertThat(result).hasSize(2);
-        // Первое бронирование должно иметь более позднее время начала (futureBooking2)
         assertThat(result.get(0).getStart()).isEqualTo(futureBooking2.getStart());
-        // Второе – futureBooking1
         assertThat(result.get(1).getStart()).isEqualTo(futureBooking1.getStart());
     }
 
@@ -378,7 +354,6 @@ public class BookingRepositoryTest {
 
         LocalDateTime now = LocalDateTime.now();
 
-        // Создаем бронирование, которое активно: start < now < end
         Booking activeBooking = new Booking();
         activeBooking.setStart(now.minusHours(2));
         activeBooking.setEnd(now.plusHours(2));
@@ -387,7 +362,6 @@ public class BookingRepositoryTest {
         activeBooking.setBooker(booker);
         activeBooking = bookingRepository.save(activeBooking);
 
-        // Создаем бронирование, которое уже закончилось (не подходит)
         Booking pastBooking = new Booking();
         pastBooking.setStart(now.minusDays(2));
         pastBooking.setEnd(now.minusDays(1));
@@ -396,7 +370,6 @@ public class BookingRepositoryTest {
         pastBooking.setBooker(booker);
         bookingRepository.save(pastBooking);
 
-        // Создаем бронирование, которое ещё не началось (не подходит)
         Booking futureBooking = new Booking();
         futureBooking.setStart(now.plusHours(3));
         futureBooking.setEnd(now.plusHours(5));
@@ -405,12 +378,10 @@ public class BookingRepositoryTest {
         futureBooking.setBooker(booker);
         bookingRepository.save(futureBooking);
 
-        // Act: вызываем метод репозитория, передавая now для обоих параметров
         List<Booking> result = bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(
                 owner.getId(), now, now
         );
 
-        // Assert: ожидаем, что вернется только активное бронирование
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getId()).isEqualTo(activeBooking.getId());
     }
@@ -436,7 +407,6 @@ public class BookingRepositoryTest {
 
         LocalDateTime now = LocalDateTime.now();
 
-        // Создаем два бронирования, завершившихся до now
         Booking booking1 = new Booking();
         booking1.setStart(now.minusDays(4));
         booking1.setEnd(now.minusDays(3));
@@ -453,7 +423,6 @@ public class BookingRepositoryTest {
         booking2.setBooker(booker);
         bookingRepository.save(booking2);
 
-        // Создаем бронирование, которое еще не завершилось (не должно попадать)
         Booking bookingFuture = new Booking();
         bookingFuture.setStart(now.plusDays(1));
         bookingFuture.setEnd(now.plusDays(2));
@@ -462,12 +431,9 @@ public class BookingRepositoryTest {
         bookingFuture.setBooker(booker);
         bookingRepository.save(bookingFuture);
 
-        // Act: вызываем метод для получения бронирований владельца, где end < now
         List<Booking> result = bookingRepository.findByItemOwnerIdAndEndBeforeOrderByStartDesc(owner.getId(), now);
 
-        // Assert: ожидаем, что вернутся 2 бронирования, отсортированные по start DESC
         assertThat(result).hasSize(2);
-        // booking2 имеет start = now.minusDays(3), а booking1 = now.minusDays(4)
         assertThat(result.get(0).getStart()).isEqualTo(booking2.getStart());
         assertThat(result.get(1).getStart()).isEqualTo(booking1.getStart());
     }
@@ -493,7 +459,6 @@ public class BookingRepositoryTest {
 
         LocalDateTime now = LocalDateTime.now();
 
-        // Создаем два бронирования, которые начинаются после now
         Booking booking1 = new Booking();
         booking1.setStart(now.plusDays(1));
         booking1.setEnd(now.plusDays(1).plusHours(2));
@@ -510,7 +475,6 @@ public class BookingRepositoryTest {
         booking2.setBooker(booker);
         bookingRepository.save(booking2);
 
-        // Создаем бронирование, которое начинается до now (не должно попадать)
         Booking bookingPast = new Booking();
         bookingPast.setStart(now.minusDays(1));
         bookingPast.setEnd(now.minusDays(1).plusHours(2));
@@ -519,12 +483,9 @@ public class BookingRepositoryTest {
         bookingPast.setBooker(booker);
         bookingRepository.save(bookingPast);
 
-        // Act: вызываем метод для получения бронирований владельца, где start > now
         List<Booking> result = bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(owner.getId(), now);
 
-        // Assert: ожидаем, что вернутся 2 бронирования, отсортированные по start DESC
         assertThat(result).hasSize(2);
-        // Ожидаем, что первым вернется бронирование с более поздним start: booking2, затем booking1
         assertThat(result.get(0).getStart()).isEqualTo(booking2.getStart());
         assertThat(result.get(1).getStart()).isEqualTo(booking1.getStart());
     }
@@ -575,7 +536,6 @@ public class BookingRepositoryTest {
         booking3.setBooker(booker);
         bookingRepository.save(booking3);
 
-        // Act: метод должен вернуть бронирование с наибольшим end, которое меньше now (то есть booking3)
         Optional<Booking> result = bookingRepository.findFirstByItemIdAndEndBeforeOrderByEndDesc(item.getId(), now);
 
         assertThat(result).isPresent();
@@ -663,12 +623,10 @@ public class BookingRepositoryTest {
         booking.setBooker(booker);
         bookingRepository.save(booking);
 
-        // Act: вызываем метод, передавая время, которое больше booking.getEnd()
         Optional<Booking> result = bookingRepository.findByBookerIdAndItemIdAndEndBefore(
                 booker.getId(), item.getId(), now
         );
 
-        // Assert: проверяем, что бронирование найдено и его время окончания соответствует ожиданию
         assertThat(result).isPresent();
         assertThat(result.get().getEnd()).isEqualTo(booking.getEnd());
     }

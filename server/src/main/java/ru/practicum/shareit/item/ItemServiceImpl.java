@@ -44,18 +44,15 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto addItem(Long userId, ItemDto itemDto) {
-        // Предположим, что ранее уже проверяли пользователя
         User owner = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found with ID: " + userId));
 
-        // Если itemDto.getRequestId() передан, то получаем ItemRequest из репозитория
         ItemRequest request = null;
         if (itemDto.getRequestId() != null) {
             request = itemRequestRepository.findById(itemDto.getRequestId())
                     .orElseThrow(() -> new NotFoundException("Item request not found with ID: " + itemDto.getRequestId()));
         }
 
-        // Прочие проверки, например, name, description и available
         if (itemDto.getName() == null || itemDto.getName().isEmpty()) {
             throw new BadRequestException("Field 'name' is required.");
         }
@@ -66,7 +63,6 @@ public class ItemServiceImpl implements ItemService {
             throw new BadRequestException("Field 'available' is required.");
         }
 
-        // Создаем вещь через маппер с учетом запроса (если он есть)
         Item item = ItemMapper.toItem(itemDto, owner, request);
         item = itemRepository.save(item);
         return ItemMapper.toItemDto(item);

@@ -9,7 +9,6 @@ public class ItemTest {
 
     @Test
     void testEqualsAndHashCode() {
-        // Arrange
         Item item1 = new Item();
         item1.setId(1L);
         item1.setName("Item One");

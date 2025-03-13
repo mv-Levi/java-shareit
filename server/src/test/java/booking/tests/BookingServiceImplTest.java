@@ -55,7 +55,6 @@ public class BookingServiceImplTest {
         booker.setEmail("booker@example.com");
         booker = userRepository.save(booker);
 
-        // Создаем владельца
         User owner = new User();
         owner.setName("Owner");
         owner.setEmail("owner@example.com");
@@ -77,14 +76,11 @@ public class BookingServiceImplTest {
 
         BookingDto createdBooking = bookingService.createBooking(booker.getId(), bookingDto);
 
-        // Assert: проверяем, что бронирование создано корректно
         assertThat(createdBooking).isNotNull();
         assertThat(createdBooking.getId()).isNotNull();
         assertThat(createdBooking.getStatus()).isEqualTo(Status.WAITING);
-        // Проверяем, что время начала и окончания соответствуют заданным
         assertThat(createdBooking.getStart()).isEqualTo(start);
         assertThat(createdBooking.getEnd()).isEqualTo(end);
-        // Проверяем, что связанные сущности корректно установлены:
         assertThat(createdBooking.getItem()).isNotNull();
         assertThat(createdBooking.getItem().getId()).isEqualTo(item.getId());
         assertThat(createdBooking.getBooker()).isNotNull();
@@ -118,10 +114,8 @@ public class BookingServiceImplTest {
         booking.setBooker(booker);
         booking = bookingRepository.save(booking);
 
-        // Act: владелец обновляет статус бронирования на APPROVED
         BookingDto updatedBooking = bookingService.updateBookingStatus(booking.getId(), true, owner.getId());
 
-        // Assert: проверяем, что статус изменился на APPROVED
         assertThat(updatedBooking.getStatus()).isEqualTo(Status.APPROVED);
     }
 
@@ -152,10 +146,8 @@ public class BookingServiceImplTest {
         booking.setBooker(booker);
         booking = bookingRepository.save(booking);
 
-        // Act: владелец обновляет статус бронирования на REJECTED
         BookingDto updatedBooking = bookingService.updateBookingStatus(booking.getId(), false, owner.getId());
 
-        // Assert: проверяем, что статус изменился на REJECTED
         assertThat(updatedBooking.getStatus()).isEqualTo(Status.REJECTED);
     }
 
@@ -186,10 +178,8 @@ public class BookingServiceImplTest {
         booking.setBooker(booker);
         booking = bookingRepository.save(booking);
 
-        // Act: получаем бронирование, делая запрос от имени booker
         BookingDto result = bookingService.getBookingById(booking.getId(), booker.getId());
 
-        // Assert: бронирование найдено и имеет правильный id
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(booking.getId());
     }
@@ -221,7 +211,6 @@ public class BookingServiceImplTest {
         booking.setBooker(booker);
         booking = bookingRepository.save(booking);
 
-        // Act: получаем бронирование, делая запрос от имени владельца вещи
         BookingDto result = bookingService.getBookingById(booking.getId(), owner.getId());
 
         assertThat(result).isNotNull();
@@ -260,7 +249,6 @@ public class BookingServiceImplTest {
         booking.setBooker(booker);
         booking = bookingRepository.save(booking);
 
-        // Act + Assert: запрос бронирования от имени пользователя "other" должен вызывать ForbiddenException
         Booking finalBooking = booking;
         User finalOther = other;
         assertThrows(ForbiddenException.class, () -> {
@@ -289,7 +277,6 @@ public class BookingServiceImplTest {
 
         LocalDateTime now = LocalDateTime.now();
 
-        // Создаем CURRENT booking: start < now < end
         Booking currentBooking = new Booking();
         currentBooking.setStart(now.minusHours(2));
         currentBooking.setEnd(now.plusHours(2));
@@ -298,7 +285,6 @@ public class BookingServiceImplTest {
         currentBooking.setBooker(booker);
         currentBooking = bookingRepository.save(currentBooking);
 
-        // Создаем PAST booking: end < now (не должен попадать в "CURRENT")
         Booking pastBooking = new Booking();
         pastBooking.setStart(now.minusHours(4));
         pastBooking.setEnd(now.minusHours(3));
@@ -307,7 +293,6 @@ public class BookingServiceImplTest {
         pastBooking.setBooker(booker);
         bookingRepository.save(pastBooking);
 
-        // Создаем FUTURE booking: start > now (не должен попадать в "CURRENT")
         Booking futureBooking = new Booking();
         futureBooking.setStart(now.plusHours(3));
         futureBooking.setEnd(now.plusHours(4));
@@ -316,10 +301,8 @@ public class BookingServiceImplTest {
         futureBooking.setBooker(booker);
         bookingRepository.save(futureBooking);
 
-        // Act: вызываем метод с state "CURRENT"
         List<BookingDto> currentBookings = bookingService.getBookingsByUser(booker.getId(), "CURRENT");
 
-        // Assert: ожидаем, что вернется только текущее бронирование
         assertThat(currentBookings).hasSize(1);
         assertThat(currentBookings.get(0).getId()).isEqualTo(currentBooking.getId());
     }
@@ -361,7 +344,6 @@ public class BookingServiceImplTest {
         futureBooking2.setBooker(booker);
         futureBooking2 = bookingRepository.save(futureBooking2);
 
-        // Создаем CURRENT booking (не должен попадать в FUTURE)
         Booking currentBooking = new Booking();
         currentBooking.setStart(now.minusHours(2));
         currentBooking.setEnd(now.plusHours(2));
@@ -370,10 +352,8 @@ public class BookingServiceImplTest {
         currentBooking.setBooker(booker);
         bookingRepository.save(currentBooking);
 
-        // Act: вызываем метод с state "FUTURE"
         List<BookingDto> futureBookings = bookingService.getBookingsByUser(booker.getId(), "FUTURE");
 
-        // Assert: ожидаем, что вернутся только два бронирования FUTURE, отсортированные по start DESC
         assertThat(futureBookings).hasSize(2);
         assertThat(futureBookings.get(0).getId()).isEqualTo(futureBooking2.getId());
         assertThat(futureBookings.get(1).getId()).isEqualTo(futureBooking1.getId());
@@ -400,7 +380,6 @@ public class BookingServiceImplTest {
 
         LocalDateTime now = LocalDateTime.now();
 
-        // Создаем бронирование, которое активно (CURRENT): start < now < end
         Booking currentBooking = new Booking();
         currentBooking.setStart(now.minusHours(2));
         currentBooking.setEnd(now.plusHours(2));
@@ -425,10 +404,8 @@ public class BookingServiceImplTest {
         futureBooking.setBooker(booker);
         bookingRepository.save(futureBooking);
 
-        // Act: вызываем метод сервиса для владельца с состоянием "CURRENT"
         List<BookingDto> result = bookingService.getBookingsByOwner(owner.getId(), "CURRENT");
 
-        // Assert: ожидаем, что вернется только текущее бронирование
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getId()).isEqualTo(currentBooking.getId());
     }
@@ -478,7 +455,6 @@ public class BookingServiceImplTest {
         currentBooking.setBooker(booker);
         bookingRepository.save(currentBooking);
 
-        // Act: вызываем метод сервиса для владельца с состоянием "FUTURE"
         List<BookingDto> result = bookingService.getBookingsByOwner(owner.getId(), "FUTURE");
 
         assertThat(result).hasSize(2);
@@ -488,7 +464,6 @@ public class BookingServiceImplTest {
 
     @Test
     void testCurrentState() {
-        // CURRENT: бронирование, у которого start < now < end
         User owner = new User(null, "Owner Current", "owner.current@example.com");
         owner = userRepository.save(owner);
 

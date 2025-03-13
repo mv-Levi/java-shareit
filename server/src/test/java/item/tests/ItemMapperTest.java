@@ -44,7 +44,6 @@ public class ItemMapperTest {
 
     @Test
     void testToItemDtoWhenRequestAbsent() {
-        // Arrange
         User owner = new User();
         owner.setId(2L);
         owner.setName("Owner Two");
@@ -72,7 +71,6 @@ public class ItemMapperTest {
 
     @Test
     void testToItem() {
-        // Arrange
         ItemDto dto = new ItemDto();
         dto.setId(300L);
         dto.setName("Mapped Item");

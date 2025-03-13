@@ -25,7 +25,6 @@ public class ItemRepositoryTest {
 
     @Test
     void testFindByOwnerId() {
-        // Arrange: создаем пользователя и две вещи, принадлежащие ему
         User owner = new User();
         owner.setName("Owner Test");
         owner.setEmail("owner@test.com");
@@ -45,10 +44,8 @@ public class ItemRepositoryTest {
         item2.setOwner(owner);
         itemRepository.save(item2);
 
-        // Act: получаем вещи по ownerId
         List<Item> items = itemRepository.findByOwnerId(owner.getId());
 
-        // Assert: проверяем, что найдено 2 вещи и их имена соответствуют ожиданиям
         assertThat(items).hasSize(2);
         assertThat(items).extracting("name")
                 .containsExactlyInAnyOrder("Item One", "Item Two");
@@ -56,7 +53,6 @@ public class ItemRepositoryTest {
 
     @Test
     void testSearchItemsByText_OnlyAvailableItems() {
-        // Arrange: создаем пользователя (владельца)
         User owner = new User();
         owner.setName("Owner Test");
         owner.setEmail("owner@test.com");

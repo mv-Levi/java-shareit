@@ -27,7 +27,6 @@ public class UserMapperTest {
 
     @Test
     void testToUser() {
-        // Arrange: создаем объект UserDto
         UserDto dto = new UserDto();
         dto.setId(2L);
         dto.setName("Jane Doe");

@@ -142,7 +142,7 @@ public class ItemServiceImplTest {
 
         ItemDto dto = new ItemDto();
         dto.setName("Valid Name");
-        dto.setDescription(""); // пустое описание
+        dto.setDescription("");
         dto.setAvailable(true);
 
         User finalOwner = owner;
@@ -443,13 +443,11 @@ public class ItemServiceImplTest {
 
     @Test
     void testAddCommentUserNotFound() {
-        // Arrange
         Long nonExistentUserId = 999L;
-        Long itemId = 1L; // допустим, не важно, т.к. пользователь не найден
+        Long itemId = 1L;
         CommentDto commentDto = new CommentDto();
         commentDto.setText("Some comment");
 
-        // Act & Assert
         assertThrows(NotFoundException.class, () ->
                 itemService.addComment(nonExistentUserId, itemId, commentDto)
         );
@@ -457,7 +455,6 @@ public class ItemServiceImplTest {
 
     @Test
     void testAddCommentItemNotFound() {
-        // Arrange: создаем пользователя
         User user = new User();
         user.setName("Commenter");
         user.setEmail("commenter@example.com");
@@ -467,7 +464,6 @@ public class ItemServiceImplTest {
         CommentDto commentDto = new CommentDto();
         commentDto.setText("Some comment");
 
-        // Act & Assert
         User finalUser = user;
         assertThrows(NotFoundException.class, () ->
                 itemService.addComment(finalUser.getId(), nonExistentItemId, commentDto)
@@ -476,7 +472,6 @@ public class ItemServiceImplTest {
 
     @Test
     void testAddCommentNoPastBooking() {
-        // Arrange: создаем пользователя, вещь, но не создаем завершённого бронирования
         User user = new User();
         user.setName("Commenter2");
         user.setEmail("commenter2@example.com");
@@ -497,7 +492,6 @@ public class ItemServiceImplTest {
         CommentDto commentDto = new CommentDto();
         commentDto.setText("No past booking comment");
 
-        // Act & Assert: ожидаем BadRequestException, так как нет завершённого бронирования
         User finalUser = user;
         Item finalItem = item;
         assertThrows(BadRequestException.class, () ->

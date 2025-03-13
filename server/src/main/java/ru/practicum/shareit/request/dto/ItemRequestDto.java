@@ -14,6 +14,5 @@ public class ItemRequestDto {
     private Long id;
     private String description;
     private LocalDateTime created;
-    // Список откликов: вещи, отвечающие на этот запрос
     private List<ItemShortDto> items;
 }

@@ -41,16 +41,14 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         itemRequest.setCreated(LocalDateTime.now());
 
         ItemRequest saved = itemRequestRepository.save(itemRequest);
-        return toDto(saved, List.of()); // На момент создания ответов нет
+        return toDto(saved, List.of());
     }
 
     @Override
     public List<ItemRequestDto> getUserRequests(Long requestorId) {
-        // Получаем запросы, созданные данным пользователем
         List<ItemRequest> requests = itemRequestRepository.findByRequestorIdOrderByCreatedDesc(requestorId);
         return requests.stream()
                 .map(req -> {
-                    // Для каждого запроса находим связанные вещи (отклики)
                     List<Item> items = itemRepository.findAll().stream()
                             .filter(item -> item.getRequest() != null && item.getRequest().getId().equals(req.getId()))
                             .collect(Collectors.toList());
@@ -70,7 +68,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public List<ItemRequestDto> getAllRequests(Long requestorId) {
-        // Получаем запросы, созданные другими пользователями
         List<ItemRequest> requests = itemRequestRepository.findByRequestorIdNotOrderByCreatedDesc(requestorId);
         return requests.stream()
                 .map(req -> {
@@ -93,7 +90,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public ItemRequestDto getRequestById(Long requestorId, Long requestId) {
-        // Проверяем, что пользователь существует
         userRepository.findById(requestorId)
                 .orElseThrow(() -> new NotFoundException("User not found with ID: " + requestorId));
         ItemRequest req = itemRequestRepository.findById(requestId)
@@ -114,7 +110,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         return toDto(req, responses);
     }
 
-    // Приватный метод для маппинга ItemRequest в ItemRequestDto с заполнением ответов
     private ItemRequestDto toDto(ItemRequest request, List<ItemShortDto> items) {
         ItemRequestDto dto = new ItemRequestDto();
         dto.setId(request.getId());

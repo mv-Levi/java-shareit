@@ -29,7 +29,6 @@ public class ItemRequest {
     @Column(name = "created", nullable = false)
     private LocalDateTime created;
 
-    // Реализация equals()/hashCode() по id
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

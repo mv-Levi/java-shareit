@@ -25,10 +25,8 @@ public class UserRepositoryTest {
         user.setEmail("john@example.com");
         userRepository.save(user);
 
-        // Act: ищем пользователя по email
         Optional<User> found = userRepository.findByEmail("john@example.com");
 
-        // Assert: проверяем, что пользователь найден и поля совпадают
         assertThat(found).isPresent();
         User foundUser = found.get();
         assertThat(foundUser.getName()).isEqualTo("John Doe");
@@ -37,10 +35,8 @@ public class UserRepositoryTest {
 
     @Test
     void testFindByEmailWhenUserDoesNotExist() {
-        // Act: ищем пользователя по несуществующему email
         Optional<User> found = userRepository.findByEmail("nonexistent@example.com");
 
-        // Assert: ожидаем, что результат пустой
         assertThat(found).isNotPresent();
     }
 }
