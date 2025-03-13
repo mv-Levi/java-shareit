@@ -2,50 +2,55 @@ package ru.practicum.shareit.booking;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookItemRequestDto;
+import ru.practicum.shareit.booking.dto.BookingState;
 
-import java.util.List;
-
-/**
- * TODO Sprint add-bookings.
- */
 @RestController
-@RequestMapping(path = "/bookings")
+@RequestMapping("/bookings")
 public class BookingController {
-    private final BookingService bookingService;
     private static final Logger log = LoggerFactory.getLogger(BookingController.class);
+    private final BookingClient bookingClient;
 
-    public BookingController(BookingService bookingService) {
-        this.bookingService = bookingService;
+    public BookingController(BookingClient bookingClient) {
+        this.bookingClient = bookingClient;
     }
 
     @PostMapping
-    public ResponseEntity<BookingDto> addBooking(@RequestBody BookingDto bookingDto,
-                                                 @RequestHeader("X-Sharer-User-Id") Long userId) {
-        System.out.println("addBooking method called");
-        return new ResponseEntity<>(bookingService.createBooking(userId, bookingDto), HttpStatus.CREATED);
+    public ResponseEntity<Object> addBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                             @RequestBody BookItemRequestDto bookingDto) {
+        log.info("Gateway: adding booking for user {}: {}", userId, bookingDto);
+        return bookingClient.bookItem(userId, bookingDto);
     }
 
     @PatchMapping("/{bookingId}")
-    public BookingDto updateBookingStatus(@PathVariable Long bookingId, @RequestParam boolean approved, @RequestHeader("X-Sharer-User-Id") Long userId) {
-        return bookingService.updateBookingStatus(bookingId, approved, userId);
+    public ResponseEntity<Object> updateBookingStatus(@PathVariable Long bookingId,
+                                                      @RequestParam boolean approved,
+                                                      @RequestHeader("X-Sharer-User-Id") Long userId) {
+        log.info("Gateway: updating booking status, bookingId={}, approved={}, userId={}",
+                bookingId, approved, userId);
+        return bookingClient.updateBookingStatus(bookingId, approved, userId);
     }
 
     @GetMapping("/{bookingId}")
-    public BookingDto getBooking(@PathVariable Long bookingId, @RequestHeader("X-Sharer-User-Id") Long userId) {
-        return bookingService.getBookingById(bookingId, userId);
+    public ResponseEntity<Object> getBooking(@PathVariable Long bookingId,
+                                             @RequestHeader("X-Sharer-User-Id") Long userId) {
+        log.info("Gateway: retrieving booking with id {} for user {}", bookingId, userId);
+        return bookingClient.getBooking(userId, bookingId);
     }
 
     @GetMapping
-    public List<BookingDto> getUserBookings(@RequestHeader("X-Sharer-User-Id") Long userId, @RequestParam(required = false, defaultValue = "ALL") String state) {
-        return bookingService.getBookingsByUser(userId, state);
+    public ResponseEntity<Object> getUserBookings(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                                  @RequestParam(defaultValue = "ALL") String state) {
+        log.info("Gateway: retrieving bookings for user {} with state {}", userId, state);
+        return bookingClient.getBookings(userId, BookingState.valueOf(state), 0, 10);
     }
 
     @GetMapping("/owner")
-    public List<BookingDto> getOwnerBookings(@RequestHeader("X-Sharer-User-Id") Long userId, @RequestParam(required = false, defaultValue = "ALL") String state) {
-        return bookingService.getBookingsByOwner(userId, state);
+    public ResponseEntity<Object> getOwnerBookings(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                                   @RequestParam(defaultValue = "ALL") String state) {
+        log.info("Gateway: retrieving owner bookings for user {} with state {}", userId, state);
+        return bookingClient.getBookingsByOwner(userId, state);
     }
 }

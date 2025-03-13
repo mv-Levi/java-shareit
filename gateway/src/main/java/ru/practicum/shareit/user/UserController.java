@@ -1,51 +1,48 @@
 package ru.practicum.shareit.user;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
 
-import java.util.List;
-import java.util.logging.Logger;
-
-/**
- * TODO Sprint add-controllers.
- */
 @RestController
-@RequestMapping(path = "/users")
+@RequestMapping("/users")
 public class UserController {
-    private static final Logger log = Logger.getLogger(UserController.class.getName());
-    private final UserService userService;
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
+    private final UserClient userClient;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
+    public UserController(UserClient userClient) {
+        this.userClient = userClient;
     }
 
     @PostMapping
-    public UserDto createUser(@RequestBody UserDto userDto) {
-        log.info("Creating user with data: " + userDto);
-        return userService.createUser(userDto);
+    public ResponseEntity<Object> createUser(@RequestBody UserDto userDto) {
+        log.info("Gateway: Creating user with data: {}", userDto);
+        return userClient.createUser(userDto);
     }
 
     @GetMapping
-    public List<UserDto> getAllUsers() {
-        log.info("Fetching all users");
-        return userService.getAllUsers();
+    public ResponseEntity<Object> getAllUsers() {
+        log.info("Gateway: Fetching all users");
+        return userClient.getAllUsers();
     }
 
     @GetMapping("/{userId}")
-    public UserDto getUser(@PathVariable Long userId) {
-        log.info("Fetching user with ID: " + userId);
-        return userService.getUser(userId);
+    public ResponseEntity<Object> getUser(@PathVariable Long userId) {
+        log.info("Gateway: Fetching user with ID: {}", userId);
+        return userClient.getUser(userId);
     }
 
     @PatchMapping("/{userId}")
-    public UserDto updateUser(@PathVariable Long userId, @RequestBody UserDto userDto) {
-        log.info("Updating user with ID: " + userId + " with data: " + userDto);
-        return userService.updateUser(userId, userDto);
+    public ResponseEntity<Object> updateUser(@PathVariable Long userId, @RequestBody UserDto userDto) {
+        log.info("Gateway: Updating user with ID: {} with data: {}", userId, userDto);
+        return userClient.updateUser(userId, userDto);
     }
 
     @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable Long userId) {
-        log.info("Deleting user with ID: " + userId);
-        userService.deleteUser(userId);
+    public ResponseEntity<Object> deleteUser(@PathVariable Long userId) {
+        log.info("Gateway: Deleting user with ID: {}", userId);
+        return userClient.deleteUser(userId);
     }
 }
