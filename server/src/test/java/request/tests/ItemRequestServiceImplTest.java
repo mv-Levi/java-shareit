@@ -253,4 +253,64 @@ public class ItemRequestServiceImplTest {
                 itemRequestService.createRequest(requestor.getId(), requestDto));
     }
 
+    @Test
+    void testGetRequestByIdWithMultipleItems() {
+        User requestor = new User();
+        requestor.setName("Requestor Filter");
+        requestor.setEmail("filter@example.com");
+        requestor = userRepository.save(requestor);
+
+        ItemRequest itemRequest = new ItemRequest();
+        itemRequest.setDescription("Filter test request");
+        itemRequest.setRequestor(requestor);
+        itemRequest.setCreated(LocalDateTime.now());
+        itemRequest = itemRequestRepository.save(itemRequest);
+
+        Item correctItem = new Item();
+        correctItem.setName("Correct item");
+        correctItem.setDescription("Belongs to itemRequest");
+        correctItem.setOwner(requestor);
+        correctItem.setAvailable(true);
+        correctItem.setRequest(itemRequest);
+        itemRepository.save(correctItem);
+
+        Item nullRequestItem = new Item();
+        nullRequestItem.setName("Null request item");
+        nullRequestItem.setDescription("Should not appear in result");
+        nullRequestItem.setOwner(requestor);
+        nullRequestItem.setAvailable(true);
+        nullRequestItem.setRequest(null);
+        itemRepository.save(nullRequestItem);
+
+        User anotherUser = new User();
+        anotherUser.setName("Another");
+        anotherUser.setEmail("another@example.com");
+        anotherUser = userRepository.save(anotherUser);
+
+        ItemRequest otherRequest = new ItemRequest();
+        otherRequest.setDescription("Other user request");
+        otherRequest.setRequestor(anotherUser);
+        otherRequest.setCreated(LocalDateTime.now().minusHours(1));
+        otherRequest = itemRequestRepository.save(otherRequest);
+
+        Item differentRequestItem = new Item();
+        differentRequestItem.setName("Different request item");
+        differentRequestItem.setDescription("Belongs to otherRequest");
+        differentRequestItem.setOwner(anotherUser);
+        differentRequestItem.setAvailable(true);
+        differentRequestItem.setRequest(otherRequest);
+        itemRepository.save(differentRequestItem);
+
+        ItemRequestDto result = itemRequestService.getRequestById(requestor.getId(), itemRequest.getId());
+
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(itemRequest.getId());
+        assertThat(result.getItems()).hasSize(1);
+
+        ItemShortDto shortDto = result.getItems().get(0);
+        assertThat(shortDto.getId()).isEqualTo(correctItem.getId());
+        assertThat(shortDto.getName()).isEqualTo("Correct item");
+        assertThat(shortDto.getOwnerId()).isEqualTo(requestor.getId());
+    }
+
 }
